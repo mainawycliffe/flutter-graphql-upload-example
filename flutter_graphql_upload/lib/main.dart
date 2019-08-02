@@ -1,12 +1,10 @@
 import 'dart:io';
+
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:graphql_flutter/graphql_flutter.dart';
-import 'package:image_picker/image_picker.dart';
 import 'package:http/http.dart';
 import 'package:http_parser/http_parser.dart';
-
-import 'dart:io';
+import 'package:image_picker/image_picker.dart';
 
 String get host => Platform.isAndroid ? '10.0.2.2' : 'localhost';
 
@@ -54,14 +52,12 @@ class _MyHomePageState extends State<MyHomePage> {
       link: httpLink,
     );
 
-    // var byteData = await image[0].requestOriginal();
     var byteData = _image.readAsBytesSync();
-    // List<int> imageData = byteData.buffer.asUint8List();
 
     var multipartFile = MultipartFile.fromBytes(
       'photo',
       byteData,
-      filename: 'some-file-name.jpg',
+      filename: '${DateTime.now().second}.jpg',
       contentType: MediaType("image", "jpg"),
     );
 
@@ -78,30 +74,7 @@ class _MyHomePageState extends State<MyHomePage> {
     print(results.errors);
   }
 
-  uploadFile() async {
-    final HttpLink httpLink = HttpLink(
-      uri: 'http://$host:8080/query',
-    );
-
-    var client = GraphQLClient(
-      cache: InMemoryCache(),
-      link: httpLink,
-    );
-
-    MutationOptions opts = MutationOptions(
-      document: uploadImage,
-      variables: {
-        "file": _image,
-      },
-    );
-
-    var results = await client.mutate(opts);
-
-    print(results.data);
-    print(results.errors);
-  }
-
-  Future getImage() async {
+  Future selectImage() async {
     var image = await ImagePicker.pickImage(source: ImageSource.gallery);
 
     setState(() {
@@ -148,7 +121,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         Text("Select File"),
                       ],
                     ),
-                    onPressed: () => getImage(),
+                    onPressed: () => selectImage(),
                   ),
                 ),
                 FlatButton(
