@@ -1,0 +1,26 @@
+name: flutter_graphql_upload
+description: A new Flutter project.
+
+version: 1.0.0+1
+
+environment:
+  sdk: ">=2.2.2 <3.0.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+  graphql_flutter: ^2.0.0
+  cupertino_icons: ^0.1.2
+  image_picker: ^0.6.0
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+
+flutter:
+  uses-material-design: true
+  assets:
+    - images/chrome.svg
+    - images/firefox.svg
+    - images/safari.svg
