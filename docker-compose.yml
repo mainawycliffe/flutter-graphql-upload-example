@@ -1,0 +1,8 @@
+version: '2.1'
+
+services:
+  golang-gqlgen-graphql-upload-example:
+    image: golang-gqlgen-graphql-upload-example
+    build: .
+    ports:
+      - 8080:8080
