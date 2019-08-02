@@ -43,7 +43,7 @@ type DirectiveRoot struct {
 
 type ComplexityRoot struct {
 	Mutation struct {
-		Upload func(childComplexity int, input FileUpload) int
+		Upload func(childComplexity int, file graphql.Upload) int
 	}
 
 	Query struct {
@@ -52,7 +52,7 @@ type ComplexityRoot struct {
 }
 
 type MutationResolver interface {
-	Upload(ctx context.Context, input FileUpload) (string, error)
+	Upload(ctx context.Context, file graphql.Upload) (string, error)
 }
 type QueryResolver interface {
 	Hello(ctx context.Context, name string) (string, error)
@@ -83,7 +83,7 @@ func (e *executableSchema) Complexity(typeName, field string, childComplexity in
 			return 0, false
 		}
 
-		return e.complexity.Mutation.Upload(childComplexity, args["input"].(FileUpload)), true
+		return e.complexity.Mutation.Upload(childComplexity, args["file"].(graphql.Upload)), true
 
 	case "Query.hello":
 		if e.complexity.Query.Hello == nil {
@@ -165,13 +165,8 @@ type Query {
   hello(name: String!): String!
 }
 
-input FileUpload {
-  file: Upload!
-  name: String!
-}
-
 type Mutation {
-  upload(input: FileUpload!): String!
+  upload(file: Upload!): String!
 }
 `},
 )
@@ -183,14 +178,14 @@ type Mutation {
 func (ec *executionContext) field_Mutation_upload_args(ctx context.Context, rawArgs map[string]interface{}) (map[string]interface{}, error) {
 	var err error
 	args := map[string]interface{}{}
-	var arg0 FileUpload
-	if tmp, ok := rawArgs["input"]; ok {
-		arg0, err = ec.unmarshalNFileUpload2githubᚗcomᚋmainawycliffeᚋgolangᚑgqlgenᚑgraphqlᚑuploadᚑexampleᚋbackendᚐFileUpload(ctx, tmp)
+	var arg0 graphql.Upload
+	if tmp, ok := rawArgs["file"]; ok {
+		arg0, err = ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, tmp)
 		if err != nil {
 			return nil, err
 		}
 	}
-	args["input"] = arg0
+	args["file"] = arg0
 	return args, nil
 }
 
@@ -284,7 +279,7 @@ func (ec *executionContext) _Mutation_upload(ctx context.Context, field graphql.
 	ctx = ec.Tracer.StartFieldResolverExecution(ctx, rctx)
 	resTmp, err := ec.ResolverMiddleware(ctx, func(rctx context.Context) (interface{}, error) {
 		ctx = rctx // use context from middleware stack in children
-		return ec.resolvers.Mutation().Upload(rctx, args["input"].(FileUpload))
+		return ec.resolvers.Mutation().Upload(rctx, args["file"].(graphql.Upload))
 	})
 	if err != nil {
 		ec.Error(ctx, err)
@@ -1572,30 +1567,6 @@ func (ec *executionContext) ___Type_ofType(ctx context.Context, field graphql.Co
 
 // region    **************************** input.gotpl *****************************
 
-func (ec *executionContext) unmarshalInputFileUpload(ctx context.Context, obj interface{}) (FileUpload, error) {
-	var it FileUpload
-	var asMap = obj.(map[string]interface{})
-
-	for k, v := range asMap {
-		switch k {
-		case "file":
-			var err error
-			it.File, err = ec.unmarshalNUpload2githubᚗcomᚋ99designsᚋgqlgenᚋgraphqlᚐUpload(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		case "name":
-			var err error
-			it.Name, err = ec.unmarshalNString2string(ctx, v)
-			if err != nil {
-				return it, err
-			}
-		}
-	}
-
-	return it, nil
-}
-
 // endregion **************************** input.gotpl *****************************
 
 // region    ************************** interface.gotpl ***************************
@@ -1936,10 +1907,6 @@ func (ec *executionContext) marshalNBoolean2bool(ctx context.Context, sel ast.Se
 		}
 	}
 	return res
-}
-
-func (ec *executionContext) unmarshalNFileUpload2githubᚗcomᚋmainawycliffeᚋgolangᚑgqlgenᚑgraphqlᚑuploadᚑexampleᚋbackendᚐFileUpload(ctx context.Context, v interface{}) (FileUpload, error) {
-	return ec.unmarshalInputFileUpload(ctx, v)
 }
 
 func (ec *executionContext) unmarshalNString2string(ctx context.Context, v interface{}) (string, error) {

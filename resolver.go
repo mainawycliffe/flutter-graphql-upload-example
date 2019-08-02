@@ -4,7 +4,10 @@ import (
 	"context"
 	"fmt"
 	"io/ioutil"
+	"log"
 	"os"
+
+	"github.com/99designs/gqlgen/graphql"
 ) // THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
 
 type Resolver struct{}
@@ -18,26 +21,29 @@ func (r *Resolver) Query() QueryResolver {
 
 type mutationResolver struct{ *Resolver }
 
-func (r *mutationResolver) Upload(ctx context.Context, input FileUpload) (string, error) {
-	f, err := os.Create(fmt.Sprintf("/tmp/%s", input.Name))
+func (r *mutationResolver) Upload(ctx context.Context, input graphql.Upload) (string, error) {
+	f, err := os.Create(fmt.Sprintf("temp/%s", input.Filename))
 
 	if err != nil {
+		log.Printf("Error: %v", err)
 		return "", err
 	}
 
-	content, err := ioutil.ReadAll(input.File.File)
+	content, err := ioutil.ReadAll(input.File)
 
 	if err != nil {
+		log.Printf("Error: %v", err)
 		return "", err
 	}
 
 	_, err = f.Write(content)
 
 	if err != nil {
+		log.Printf("Error: %v", err)
 		return "", err
 	}
 
-	return input.Name, nil
+	return fmt.Sprintf("http://localhost:8080/temp/%s", input.Filename), nil
 }
 
 type queryResolver struct{ *Resolver }
