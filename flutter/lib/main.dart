@@ -21,19 +21,37 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
+    final HttpLink httpLink = HttpLink(
+      uri: 'http://$host:8080/query',
+    );
+
+    var client = ValueNotifier(
+      GraphQLClient(
+        cache: InMemoryCache(),
+        link: httpLink,
+      ),
+    );
+
     return MaterialApp(
       title: 'Flutter Demo',
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: MyHomePage(title: 'GraphQL Upload Demo'),
+      home: GraphQLProvider(
+        client: client,
+        child: Scaffold(
+          appBar: AppBar(
+            title: Text("Graphql Upload Image Demo"),
+          ),
+          body: MyHomePage(),
+        ),
+      ),
     );
   }
 }
 
 class MyHomePage extends StatefulWidget {
-  MyHomePage({Key key, this.title}) : super(key: key);
-  final String title;
+  MyHomePage();
 
   @override
   _MyHomePageState createState() => _MyHomePageState();
@@ -41,16 +59,12 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   File _image;
+  bool _uploadInProgress = false;
 
-  uploadAsset() async {
-    final HttpLink httpLink = HttpLink(
-      uri: 'http://$host:8080/query',
-    );
-
-    var client = GraphQLClient(
-      cache: InMemoryCache(),
-      link: httpLink,
-    );
+  uploadAsset(BuildContext context) async {
+    setState(() {
+      _uploadInProgress = true;
+    });
 
     var byteData = _image.readAsBytesSync();
 
@@ -68,10 +82,21 @@ class _MyHomePageState extends State<MyHomePage> {
       },
     );
 
+    // sleep(const Duration(seconds: 2));
+
+    var client = GraphQLProvider.of(context).value;
     var results = await client.mutate(opts);
 
-    print(results.data);
-    print(results.errors);
+    setState(() {
+      _uploadInProgress = false;
+    });
+
+    var message = results.hasErrors
+        ? '${results.errors.join(", ")}'
+        : "Image was uploaded successfully!";
+
+    final snackBar = SnackBar(content: Text(message));
+    Scaffold.of(context).showSnackBar(snackBar);
   }
 
   Future selectImage() async {
@@ -84,63 +109,61 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(widget.title),
-      ),
-      body: Container(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          mainAxisSize: MainAxisSize.max,
-          children: <Widget>[
-            if (_image != null)
+    return Container(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        mainAxisSize: MainAxisSize.max,
+        children: <Widget>[
+          if (_image != null)
+            Flexible(
+              flex: 9,
+              child: Image.file(_image),
+            )
+          else
+            Flexible(
+              flex: 9,
+              child: Text("No Image Selected"),
+            ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            mainAxisSize: MainAxisSize.max,
+            children: <Widget>[
               Flexible(
-                flex: 9,
-                child: Image.file(_image),
-              )
-            else
-              Flexible(
-                flex: 9,
-                child: Text("No Image Selected"),
-              ),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              mainAxisSize: MainAxisSize.max,
-              children: <Widget>[
-                Flexible(
-                  flex: 1,
-                  child: FlatButton(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      mainAxisSize: MainAxisSize.min,
-                      children: <Widget>[
-                        Icon(Icons.photo_library),
-                        SizedBox(
-                          width: 5,
-                        ),
-                        Text("Select File"),
-                      ],
-                    ),
-                    onPressed: () => selectImage(),
-                  ),
-                ),
-                FlatButton(
+                flex: 1,
+                child: FlatButton(
                   child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
                     mainAxisSize: MainAxisSize.min,
                     children: <Widget>[
-                      Icon(Icons.file_upload),
+                      Icon(Icons.photo_library),
                       SizedBox(
                         width: 5,
                       ),
-                      Text("Upload File"),
+                      Text("Select File"),
                     ],
                   ),
-                  onPressed: () => uploadAsset(),
+                  onPressed: () => selectImage(),
                 ),
-              ],
-            )
-          ],
-        ),
+              ),
+              if (_image != null)
+                FlatButton(
+                  child: _uploadInProgress
+                      ? CircularProgressIndicator()
+                      : Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: <Widget>[
+                            Icon(Icons.file_upload),
+                            SizedBox(
+                              width: 5,
+                            ),
+                            Text("Upload File"),
+                          ],
+                        ),
+                  onPressed: () => uploadAsset(context),
+                ),
+            ],
+          )
+        ],
       ),
     );
   }
