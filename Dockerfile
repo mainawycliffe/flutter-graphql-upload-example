@@ -12,5 +12,6 @@ RUN go build -v -o app
 FROM alpine:latest
 RUN apk --no-cache add ca-certificates
 COPY --from=builder /app/backend/server/app /app
+RUN mkdir -p temp
 ENTRYPOINT ./app
 EXPOSE 8080
