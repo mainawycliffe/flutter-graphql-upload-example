@@ -1,3 +1,3 @@
 # Flutter GraphQL Image Uploads
 
-![Demo]("demo.gif")
+![Demo](demo.gif)
