@@ -6,6 +6,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"time"
 
 	"github.com/99designs/gqlgen/graphql"
 ) // THIS CODE IS A STARTING POINT ONLY. IT WILL NOT BE UPDATED WITH SCHEMA CHANGES.
@@ -42,6 +43,8 @@ func (r *mutationResolver) Upload(ctx context.Context, input graphql.Upload) (st
 		log.Printf("Error: %v", err)
 		return "", err
 	}
+
+	time.Sleep(2 * time.Second)
 
 	return fmt.Sprintf("http://localhost:8080/temp/%s", input.Filename), nil
 }
