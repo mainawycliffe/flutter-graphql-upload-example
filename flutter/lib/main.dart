@@ -82,8 +82,6 @@ class _MyHomePageState extends State<MyHomePage> {
       },
     );
 
-    // sleep(const Duration(seconds: 2));
-
     var client = GraphQLProvider.of(context).value;
     var results = await client.mutate(opts);
 
@@ -146,21 +144,75 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               ),
               if (_image != null)
-                FlatButton(
-                  child: _uploadInProgress
-                      ? CircularProgressIndicator()
-                      : Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: <Widget>[
-                            Icon(Icons.file_upload),
-                            SizedBox(
-                              width: 5,
+                Mutation(
+                  options: MutationOptions(
+                    document: uploadImage,
+                  ),
+                  builder: (RunMutation runMutation, QueryResult result) {
+                    return FlatButton(
+                      child: _uploadInProgress
+                          ? CircularProgressIndicator()
+                          : Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: <Widget>[
+                                Icon(Icons.file_upload),
+                                SizedBox(
+                                  width: 5,
+                                ),
+                                Text("Upload File"),
+                              ],
                             ),
-                            Text("Upload File"),
-                          ],
-                        ),
-                  onPressed: () => uploadAsset(context),
+                      onPressed: () {
+                        setState(() {
+                          _uploadInProgress = true;
+                        });
+
+                        var byteData = _image.readAsBytesSync();
+
+                        var multipartFile = MultipartFile.fromBytes(
+                          'photo',
+                          byteData,
+                          filename: '${DateTime.now().second}.jpg',
+                          contentType: MediaType("image", "jpg"),
+                        );
+
+                        runMutation(<String, dynamic>{
+                          "file": multipartFile,
+                        });
+                      },
+                    );
+                  },
+                  onCompleted: (d) {
+                    print(d);
+                    setState(() {
+                      _uploadInProgress = false;
+                    });
+                  },
+                  update: (cache, results) {
+                    var message = results.hasErrors
+                        ? '${results.errors.join(", ")}'
+                        : "Image was uploaded successfully!";
+
+                    final snackBar = SnackBar(content: Text(message));
+                    Scaffold.of(context).showSnackBar(snackBar);
+                  },
                 ),
+              // if (_image != null)
+              //   FlatButton(
+              //     child: _uploadInProgress
+              //         ? CircularProgressIndicator()
+              //         : Row(
+              //             mainAxisSize: MainAxisSize.min,
+              //             children: <Widget>[
+              //               Icon(Icons.file_upload),
+              //               SizedBox(
+              //                 width: 5,
+              //               ),
+              //               Text("Upload File"),
+              //             ],
+              //           ),
+              //     onPressed: () => uploadAsset(context),
+              //   ),
             ],
           )
         ],
