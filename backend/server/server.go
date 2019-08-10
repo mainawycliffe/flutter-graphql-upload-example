@@ -17,6 +17,7 @@ func main() {
 		port = defaultPort
 	}
 
+	http.Handle("/temp/", http.StripPrefix("/temp/", http.FileServer(http.Dir("temp"))))
 	http.Handle("/", handler.Playground("GraphQL playground", "/query"))
 	http.Handle("/query", handler.GraphQL(backend.NewExecutableSchema(backend.Config{Resolvers: &backend.Resolver{}})))
 
