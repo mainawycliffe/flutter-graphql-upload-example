@@ -122,7 +122,8 @@ class _MyHomePageState extends State<MyHomePage> {
               flex: 9,
               child: Text("No Image Selected"),
             ),
-          Row(
+          Flexible(
+            child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             mainAxisSize: MainAxisSize.max,
             children: <Widget>[
@@ -140,7 +141,6 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   onPressed: () => selectImage(),
                 ),
-              ),
               if (_image != null)
                 Mutation(
                   options: MutationOptions(
@@ -190,6 +190,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 //     onPressed: () => _uploadImage(context),
               //   ),
             ],
+            ),
           )
         ],
       ),
