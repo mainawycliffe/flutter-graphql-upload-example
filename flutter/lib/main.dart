@@ -21,7 +21,7 @@ void main() {
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    final HttpLink httpLink = HttpLink(
+    final httpLink = HttpLink(
       uri: 'http://$host:8080/query',
     );
 
@@ -61,7 +61,7 @@ class _MyHomePageState extends State<MyHomePage> {
   File _image;
   bool _uploadInProgress = false;
 
-  uploadAsset(BuildContext context) async {
+  _uploadImage(BuildContext context) async {
     setState(() {
       _uploadInProgress = true;
     });
@@ -82,7 +82,15 @@ class _MyHomePageState extends State<MyHomePage> {
       },
     );
 
-    var client = GraphQLProvider.of(context).value;
+    final httpLink = HttpLink(
+      uri: 'http://$host:8080/query',
+    );
+
+    var client = GraphQLClient(
+      cache: InMemoryCache(),
+      link: httpLink,
+    );
+
     var results = await client.mutate(opts);
 
     setState(() {
@@ -121,14 +129,14 @@ class _MyHomePageState extends State<MyHomePage> {
             Flexible(
               flex: 9,
               child: Center(
-              child: Text("No Image Selected"),
-            ),
+                child: Text("No Image Selected"),
+              ),
             ),
           Flexible(
             child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            mainAxisSize: MainAxisSize.max,
-            children: <Widget>[
+              mainAxisAlignment: MainAxisAlignment.center,
+              mainAxisSize: MainAxisSize.max,
+              children: <Widget>[
                 FlatButton(
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -143,55 +151,55 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   onPressed: () => selectImage(),
                 ),
-              if (_image != null)
-                Mutation(
-                  options: MutationOptions(
-                    document: uploadImage,
-                  ),
-                  builder: (RunMutation runMutation, QueryResult result) {
-                    return FlatButton(
+                if (_image != null)
+                  Mutation(
+                    options: MutationOptions(
+                      document: uploadImage,
+                    ),
+                    builder: (RunMutation runMutation, QueryResult result) {
+                      return FlatButton(
                         child: _isLoadingInProgress(),
-                      onPressed: () {
-                        setState(() {
-                          _uploadInProgress = true;
-                        });
+                        onPressed: () {
+                          setState(() {
+                            _uploadInProgress = true;
+                          });
 
-                        var byteData = _image.readAsBytesSync();
+                          var byteData = _image.readAsBytesSync();
 
-                        var multipartFile = MultipartFile.fromBytes(
-                          'photo',
-                          byteData,
-                          filename: '${DateTime.now().second}.jpg',
-                          contentType: MediaType("image", "jpg"),
-                        );
+                          var multipartFile = MultipartFile.fromBytes(
+                            'photo',
+                            byteData,
+                            filename: '${DateTime.now().second}.jpg',
+                            contentType: MediaType("image", "jpg"),
+                          );
 
-                        runMutation(<String, dynamic>{
-                          "file": multipartFile,
-                        });
-                      },
-                    );
-                  },
-                  onCompleted: (d) {
-                    print(d);
-                    setState(() {
-                      _uploadInProgress = false;
-                    });
-                  },
-                  update: (cache, results) {
-                    var message = results.hasErrors
-                        ? '${results.errors.join(", ")}'
-                        : "Image was uploaded successfully!";
+                          runMutation(<String, dynamic>{
+                            "file": multipartFile,
+                          });
+                        },
+                      );
+                    },
+                    onCompleted: (d) {
+                      print(d);
+                      setState(() {
+                        _uploadInProgress = false;
+                      });
+                    },
+                    update: (cache, results) {
+                      var message = results.hasErrors
+                          ? '${results.errors.join(", ")}'
+                          : "Image was uploaded successfully!";
 
-                    final snackBar = SnackBar(content: Text(message));
-                    Scaffold.of(context).showSnackBar(snackBar);
-                  },
-                ),
-              // if (_image != null)
-              //   FlatButton(
+                      final snackBar = SnackBar(content: Text(message));
+                      Scaffold.of(context).showSnackBar(snackBar);
+                    },
+                  ),
+                // if (_image != null)
+                //   FlatButton(
                 //     child: _isLoadingInProgress(),
                 //     onPressed: () => _uploadImage(context),
-              //   ),
-            ],
+                //   ),
+              ],
             ),
           )
         ],
