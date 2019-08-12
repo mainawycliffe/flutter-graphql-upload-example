@@ -120,7 +120,9 @@ class _MyHomePageState extends State<MyHomePage> {
           else
             Flexible(
               flex: 9,
+              child: Center(
               child: Text("No Image Selected"),
+            ),
             ),
           Flexible(
             child: Row(
