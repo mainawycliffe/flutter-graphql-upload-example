@@ -150,18 +150,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   ),
                   builder: (RunMutation runMutation, QueryResult result) {
                     return FlatButton(
-                      child: _uploadInProgress
-                          ? CircularProgressIndicator()
-                          : Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: <Widget>[
-                                Icon(Icons.file_upload),
-                                SizedBox(
-                                  width: 5,
-                                ),
-                                Text("Upload File"),
-                              ],
-                            ),
+                        child: _isLoadingInProgress(),
                       onPressed: () {
                         setState(() {
                           _uploadInProgress = true;
@@ -199,24 +188,28 @@ class _MyHomePageState extends State<MyHomePage> {
                 ),
               // if (_image != null)
               //   FlatButton(
-              //     child: _uploadInProgress
-              //         ? CircularProgressIndicator()
-              //         : Row(
-              //             mainAxisSize: MainAxisSize.min,
-              //             children: <Widget>[
-              //               Icon(Icons.file_upload),
-              //               SizedBox(
-              //                 width: 5,
-              //               ),
-              //               Text("Upload File"),
-              //             ],
-              //           ),
-              //     onPressed: () => uploadAsset(context),
+                //     child: _isLoadingInProgress(),
+                //     onPressed: () => _uploadImage(context),
               //   ),
             ],
           )
         ],
       ),
     );
+  }
+
+  Widget _isLoadingInProgress() {
+    return _uploadInProgress
+        ? CircularProgressIndicator()
+        : Row(
+            mainAxisSize: MainAxisSize.min,
+            children: <Widget>[
+              Icon(Icons.file_upload),
+              SizedBox(
+                width: 5,
+              ),
+              Text("Upload File"),
+            ],
+          );
   }
 }
