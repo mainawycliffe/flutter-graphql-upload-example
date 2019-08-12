@@ -1,7 +1,7 @@
 # Flutter GraphQL Image Uploads
 
 <p align="center">
-    ![Demo](demo.gif)
+    <img src="demo.gif">
 </p>
 
 This repo is to demo how to upload files using GraphQL and Flutter. The backend is build using Golang but can be run using docker - no need to install golang.
