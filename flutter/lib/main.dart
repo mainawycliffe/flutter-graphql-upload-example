@@ -86,10 +86,7 @@ class _MyHomePageState extends State<MyHomePage> {
       uri: 'http://$host:8080/query',
     );
 
-    var client = GraphQLClient(
-      cache: InMemoryCache(),
-      link: httpLink,
-    );
+    var client = GraphQLProvider.of(context).value;
 
     var results = await client.mutate(opts);
 
