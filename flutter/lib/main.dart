@@ -82,10 +82,6 @@ class _MyHomePageState extends State<MyHomePage> {
       },
     );
 
-    final httpLink = HttpLink(
-      uri: 'http://$host:8080/query',
-    );
-
     var client = GraphQLProvider.of(context).value;
 
     var results = await client.mutate(opts);
