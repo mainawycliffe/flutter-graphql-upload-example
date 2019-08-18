@@ -28,4 +28,6 @@ To run the frontend, change directory to the `flutter` directory, and run `flutt
     <img src="demo.gif">
 </p>
 
-A follow up post is coming soon.
+### Accompanying Post
+
+You can find a detailed explanation for the fronted [here](https://codinglatte.com/posts/flutter/flutter-and-graphql-how-to-upload-files/).
