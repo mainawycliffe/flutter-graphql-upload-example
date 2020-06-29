@@ -8,7 +8,7 @@ import 'package:image_picker/image_picker.dart';
 
 String get host => Platform.isAndroid ? '10.0.2.2' : 'localhost';
 
-const uploadImage = r"""
+const String uploadImage = r"""
 mutation($file: Upload!) {
   upload(file: $file)
 }
@@ -60,49 +60,13 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage> {
   File _image;
   bool _uploadInProgress = false;
-
-  _uploadImage(BuildContext context) async {
-    setState(() {
-      _uploadInProgress = true;
-    });
-
-    var byteData = _image.readAsBytesSync();
-
-    var multipartFile = MultipartFile.fromBytes(
-      'photo',
-      byteData,
-      filename: '${DateTime.now().second}.jpg',
-      contentType: MediaType("image", "jpg"),
-    );
-
-    var opts = MutationOptions(
-      document: uploadImage,
-      variables: {
-        "file": multipartFile,
-      },
-    );
-
-    var client = GraphQLProvider.of(context).value;
-
-    var results = await client.mutate(opts);
-
-    setState(() {
-      _uploadInProgress = false;
-    });
-
-    var message = results.hasErrors
-        ? '${results.errors.join(", ")}'
-        : "Image was uploaded successfully!";
-
-    final snackBar = SnackBar(content: Text(message));
-    Scaffold.of(context).showSnackBar(snackBar);
-  }
+  final picker = ImagePicker();
 
   Future selectImage() async {
-    var image = await ImagePicker.pickImage(source: ImageSource.gallery);
+    final pickedFile = await picker.getImage(source: ImageSource.gallery);
 
     setState(() {
-      _image = image;
+      _image = File(pickedFile.path);
     });
   }
 
@@ -147,9 +111,24 @@ class _MyHomePageState extends State<MyHomePage> {
                 if (_image != null)
                   Mutation(
                     options: MutationOptions(
-                      document: uploadImage,
-                    ),
-                    builder: (RunMutation runMutation, QueryResult result) {
+                        documentNode: gql(uploadImage),
+                        onCompleted: (d) {
+                          print(d);
+                          setState(() {
+                            _uploadInProgress = false;
+                          });
+                        },
+                        update: (cache, results) {
+                          var message = results.hasException
+                              ? '${results.exception}'
+                              : "Image was uploaded successfully!";
+                          var snackBar = SnackBar(content: Text(message));
+                          Scaffold.of(context).showSnackBar(snackBar);
+                        }),
+                    builder: (
+                      RunMutation runMutation,
+                      QueryResult result,
+                    ) {
                       return FlatButton(
                         child: _isLoadingInProgress(),
                         onPressed: () {
@@ -172,26 +151,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         },
                       );
                     },
-                    onCompleted: (d) {
-                      print(d);
-                      setState(() {
-                        _uploadInProgress = false;
-                      });
-                    },
-                    update: (cache, results) {
-                      var message = results.hasErrors
-                          ? '${results.errors.join(", ")}'
-                          : "Image was uploaded successfully!";
-
-                      final snackBar = SnackBar(content: Text(message));
-                      Scaffold.of(context).showSnackBar(snackBar);
-                    },
                   ),
-                // if (_image != null)
-                //   FlatButton(
-                //     child: _isLoadingInProgress(),
-                //     onPressed: () => _uploadImage(context),
-                //   ),
               ],
             ),
           )
